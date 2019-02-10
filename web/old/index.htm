@@ -1,0 +1,339 @@
+<html>
+	<head>
+		<link href='https://fonts.googleapis.com/css?family=Roboto+Condensed' rel='stylesheet' type='text/css'>
+		<link rel="icon" type="image/png" href="robot.png" />
+		<meta name="theme-color" content="#DF2C2C">
+		<meta name="viewport" content="width=600">
+		<style>
+		.onoffswitch {
+			position: relative; width: 128px;
+			-webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+		}
+		.onoffswitch-checkbox {
+			display: none;
+		}
+		.onoffswitch-label {
+			display: block; overflow: hidden; cursor: pointer;
+			border: 2px solid #EEEEEE; border-radius: 50px;
+		}
+		.onoffswitch-inner {
+			display: block; width: 200%; margin-left: -100%;
+			transition: margin 0.3s ease-in 0s;
+		}
+		.onoffswitch-inner:before, .onoffswitch-inner:after {
+			display: block; float: left; width: 50%; height: 67px; padding: 0; line-height: 67px;
+			font-size: 14px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
+			box-sizing: border-box;
+		}
+		.onoffswitch-inner:before {
+			content: "";
+			padding-left: 10px;
+			background-color: #EEEEEE; color: #FFFFFF;
+		}
+		.onoffswitch-inner:after {
+			content: "";
+			padding-right: 10px;
+			background-color: #EEEEEE; color: #999999;
+			text-align: right;
+		}
+		.onoffswitch-switch {
+			display: block; width: 50px; margin: 8.5px;
+			background: #4D4D4D;
+			position: absolute; top: 0; bottom: 0;
+			right: 63px;
+			border: 2px solid #EEEEEE; border-radius: 50px;
+			transition: all 0.3s ease-in 0s; 
+		}
+		.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+			margin-left: 0;
+		}
+		.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+			right: 0px; 
+			background-color: #4CAF50; 
+		}
+		.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch.blue {
+			background-color: #27A1CA; 
+		}
+		.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch.red {
+			background-color: #DA1717; 
+		}
+		
+		.cursorDefault {
+			cursor: default; 
+		}
+
+		.label {
+			font-family: 'Roboto Condensed', sans-serif;
+			font-size: 2.5em;
+			/*font-weight: bold;*/
+		}
+
+		table {
+			margin-top: 10%;
+			width: auto;
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		table td:first-child {
+			text-align: right;
+		}
+		
+		body{
+			background: rgba(255,255,255,1);
+			background: -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%);
+			background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(255,255,255,1)), color-stop(47%, rgba(246,246,246,1)), color-stop(100%, rgba(237,237,237,1)));
+			background: -webkit-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%);
+			background: -o-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%);
+			background: -ms-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%);
+			background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%);
+			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#ededed', GradientType=0 );
+		}
+		
+		body#lit{
+			background: rgba(255,255,255,1);
+			background: -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgb(255, 250, 246) 47%, rgb(255, 237, 222) 100%););
+			background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(255,255,255,1)), color-stop(47%, rgba(255,250,246,1)), color-stop(100%, rgba(255,237,222,1)));
+			background: -webkit-linear-gradient(top, rgba(255,255,255,1) 0%, rgb(255, 250, 246) 47%, rgb(255, 237, 222) 100%););
+			background: -o-linear-gradient(top, rgba(255,255,255,1) 0%, rgb(255, 250, 246) 47%, rgb(255, 237, 222) 100%););
+			background: -ms-linear-gradient(top, rgba(255,255,255,1) 0%, rgb(255, 250, 246) 47%, rgb(255, 237, 222) 100%););
+			background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgb(255, 250, 246) 47%, rgb(255, 237, 222) 100%););
+			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#FFEDDE', GradientType=0 );
+		}
+		</style>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+		<script src="moment.min.js"></script>
+		<!--<script src="mousetrap.min.js"></script>-->
+		<script>
+			if ( ! window.console ) {
+				console = { log: function(){}} ;
+			} else {
+				console.logCopy = console.log.bind(console);
+
+				console.log = function(data)
+				{
+					var timestamp = '[' + moment().format('LTS') + ']';
+					
+					var arguementsArray = Array.prototype.slice.call(arguments);
+					arguementsArray.unshift(timestamp);
+					this.logCopy.apply(console, arguementsArray);
+				};
+			}
+			
+			if (!Object.keys) {
+				Object.keys = function(obj) {
+				var keys = [];
+
+				for (var i in obj) {
+					if (obj.hasOwnProperty(i)) {
+						keys.push(i);
+					}
+				}
+
+				return keys;
+				};
+			}
+			
+			// Mousetrap
+			/*Mousetrap.bind('n e a r enter', function() {
+				set('room',~~!$targ.roomSleep.prop('checked'));
+				$.getJSON('query.php?mode=set&type=bluetooth&state='+~~!$targ.presence.prop('checked'));
+				$targ.presence.closest('tr').fadeOut(200).fadeIn(100);
+			});
+			Mousetrap.bind('r o o m enter', function() {
+				set('room',~~!$targ.roomSleep.prop('checked'));
+				$targ.roomSleep.closest('tr').fadeOut(200).fadeIn(100);
+			});
+			Mousetrap.bind('p c a w a k e enter', function() {
+				set('pcAwake',~~!$targ.pcAwake.prop('checked'));
+				$targ.pcAwake.closest('tr').fadeOut(200).fadeIn(100);
+			});*/
+		
+			var $targ = {};
+			$(function() {
+				// turn off caching
+				$.ajaxSetup({ cache: false });
+			
+				$targ.body = $('body');
+				$targ.table = $('#main');
+				$targ.presence = $('#presence');
+				$targ.presenceColour = $('#presence_colour');
+				$targ.presenceMotion = $('#presenceMotion');
+				$targ.roomSleep = $('#roomSleep').click(function(e) {
+					var $this = $(this);
+					
+					if ($this.prop('checked')) {
+						// from false to true
+						var r = confirm("Press OK to confirm.");
+						if (r) {
+							set('room',~~$this.prop('checked'));	// ~~ converts boolean into digit
+						} else {
+							$targ.roomSleep.prop('checked', false);
+						}
+					} else {
+						set('room',-1);
+					}
+				});
+				$targ.pcAwake = $('#pcAwake').click(function() {
+					set('pcAwake',~~$(this).prop('checked'));	// ~~ converts boolean into digit
+				});
+				$targ.lightLevel = $('#lightLevel');
+				$targ.intervalCheck = '';
+				
+				intervalCheck(true);
+			});
+			
+			function queryAll() {
+				$.getJSON('query.php?mode=get&type=all', function(data) {
+					if (Object.keys(data).length >= 3) {	// should be == 3, but lazy programming in case more is added in future
+						console.log('queryAll: '+ JSON.stringify(data));
+						
+						var presenceVal = 0;
+						$targ.presenceColour.removeClass("blue red purple");
+						if (parseInt(data.presence)>0) {
+							presenceVal = 1;
+							if (parseInt(data.presence) == 2) $targ.presenceColour.addClass("red");
+							else if (parseInt(data.presence) == 1) $targ.presenceColour.addClass("blue");
+						}
+						$targ.presence.prop('checked',presenceVal);
+						
+						$targ.presenceMotion.prop('checked',parseInt(data.presenceMotion));
+						$targ.roomSleep.prop('checked',parseInt(data.roomSleep));
+						$targ.pcAwake.prop('checked',parseInt(data.pcAwake));
+						$targ.lightLevel.text(parseInt(data.lightLevel));
+						
+						if (parseInt(data.bedroomLamp_status) == 1) {
+							if ($targ.body.attr('id') != 'lit') {
+								$targ.body.attr('id','lit');
+							}
+						} else {
+							if ($targ.body.attr('id') == 'lit') {
+								$targ.body.removeAttr('id');
+							}
+						}
+						
+						if ($targ.table.css('display') == 'none') $targ.table.fadeIn();
+					}
+				});
+				/*$.getJSON("http://192.168.1.9/cgi-bin/json.cgi?get=state&callback=?", function(data) {
+					if (typeof(data) == 'object') {
+						if (data.state == 'on') {
+							if ($targ.body.attr('id') != 'lit') {
+								$targ.body.attr('id','lit');
+							}
+						} else {
+							if ($targ.body.attr('id') == 'lit') {
+								$targ.body.removeAttr('id');
+							}
+						}
+					}
+				});*/
+			}
+			
+			function set(type,state) {
+				if (typeof type === 'undefined' || typeof state === 'undefined') {
+					console.log('set: Not enough parameters given.');
+					return false;
+				} else {
+					intervalCheck(false);
+					console.log('set: Setting',type,'to',state+'.');
+					$.getJSON('query.php?mode=set&json=1&type='+type+'&state='+state, function(data) {
+						console.log('set: Command sent successfully.');
+						intervalCheck(true);
+					},function() {
+						intervalCheck(true);
+					});
+				}
+			}
+			
+			function intervalCheck(mode) {
+				if (mode == true) {
+					$targ.intervalCheck = setInterval(queryAll,5*1000);
+					console.log('intervalCheck: Enabled.')
+					queryAll();
+				} else if (mode == false) {
+					clearInterval($targ.intervalCheck);
+					console.log('intervalCheck: Disabled.')
+				}
+			}
+		</script>
+		<title>Alastair</title>
+	</head>
+
+	<body>
+		<div id="body">
+			<table id="main" align="center" cellpadding="10" style="display:none;">
+				<tr>
+					<td colspan="2" style="text-align: center;">
+						<img src="alastair-logo.png" style="height: 80px;"><p> </p>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<span class="label"><a href="logs.php" target="_blank" style="text-decoration: none;	color: black;">Ambient: </a>
+						</span>
+					</td>
+					<td>
+					   <span id="lightLevel" class="label">-</span>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<span class="label">Motion: </span>
+					</td>
+					<td>
+					   <div class="onoffswitch">
+							<input id="presenceMotion" type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" disabled>
+							<label for="presenceMotion" class="onoffswitch-label cursorDefault">
+								<span class="onoffswitch-inner"></span>
+								<span class="onoffswitch-switch"></span>
+							</label>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<span class="label">Presence: </span>
+					</td>
+					<td>
+					   <div class="onoffswitch">
+							<input id="presence" type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" disabled>
+							<label for="presence" class="onoffswitch-label cursorDefault">
+								<span class="onoffswitch-inner"></span>
+								<span id="presence_colour" class="onoffswitch-switch"></span>
+							</label>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<span class="label">Keep Awake: </span>
+					</td>
+					<td>
+					   <div class="onoffswitch">
+							<input id="pcAwake" type="checkbox" name="onoffswitch" class="onoffswitch-checkbox">
+							<label for="pcAwake" class="onoffswitch-label">
+								<span class="onoffswitch-inner"></span>
+								<span class="onoffswitch-switch"></span>
+							</label>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<span class="label" style="font-weight:bold;">Sleep State: </span>
+					</td>
+					<td>
+					   <div class="onoffswitch">
+							<input id="roomSleep" type="checkbox" name="onoffswitch" class="onoffswitch-checkbox">
+							<label for="roomSleep" class="onoffswitch-label">
+								<span class="onoffswitch-inner"></span>
+								<span class="onoffswitch-switch"></span>
+							</label>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</body>
+</html>

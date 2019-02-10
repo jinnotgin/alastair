@@ -1,0 +1,196 @@
+[*] update packages, replace logging
+sudo su
+apt-get update
+apt-get upgrade
+apt-get install python-pip python3-pip
+apt-get install busybox-syslogd -y; dpkg --purge rsyslog
+
+
+[*] Thermal and 1-wire
+nano /boot/config.txt
+^
+dtoverlay=w1-gpio,gpiopin=4
+
+modprobe w1-gpio
+modprobe w1-therm
+echo "w1-gpio" | tee -a /etc/modules
+echo "w1-therm" | tee -a /etc/modules
+
+
+[*] Set Timezone
+raspi-config
+^
+1) Expand Filesystem
+2) Change Password
+5) Internationalisation > T1 & T2
+9) Advanced > A7 (I2C)
+
+
+[*] reboot now
+reboot
+
+
+[*] Install apache & bluetooth and arpscan
+
+sudo apt-get install apache2 bluetooth python-bluetooth -y
+sudo chown pi:pi -R /var/www
+sudo apt-get install php5 libapache2-mod-php5 -y
+sudo pip install pybluez
+sudo pip install flask
+sudo apt-get install arp-scan python-smbus i2c-tools -y
+
+
+[*] Setup Automount
+
+sudo mkdir /mnt/usbstorage
+sudo chown -R pi:pi /mnt/usbstorage
+sudo chmod -R 775 /mnt/usbstorage
+sudo setfacl -Rdm g:pi:rwx /mnt/usbstorage
+sudo setfacl -Rm g:pi:rwx /mnt/usbstorage
+
+sudo nano /etc/fstab
+^
+UUID=F60E-3096 /mnt/usbstorage vfat auto,users,rw,uid=pi,gid=www-data,dmask=000,fmask=000 0 0
+
+sudo mount -a
+
+
+[*] Create "alastair" folder, copy in python files
+-
+
+
+[*] Create Symlink
+
+ln -s /mnt/usbstorage/alastair/data /home/pi/alastair/data
+ln -s /mnt/usbstorage/alastair/logs /home/pi/alastair/logs
+ln -s /var/www/html /home/pi/www
+
+
+[*] Copy "web" folder into "www" symlink
+-
+
+
+[*] Fix permissions
+chmod -R 775 /home/pi/alastair/permissionsCheck.sh
+sudo /home/pi/alastair/permissionsCheck.sh
+
+
+[*] Crontab
+
+crontab -e
+^
+@reboot /home/pi/alastair/afterBoot.sh
+30 10 * * * python /home/pi/alastair/roomSleep_reset.py
+*/10 * * * * sudo /home/pi/alastair/permissionsCheck.sh
+*/3 * * * * sudo /home/pi/alastair/arpScanner.sh
+
+
+[*] Systemctl
+
+sudo nano /lib/systemd/system/alastair-rulesLoop.service
+^
+[Unit]
+Description=Alastair's rulesProcessor (Loop)
+After=multi-user.target
+
+[Service]
+Restart=always
+Type=idle
+ExecStart=/usr/bin/python /home/pi/alastair/rulesProcessor.py -loop -silent
+
+[Install]
+WantedBy=multi-user.target
+
+sudo nano /lib/systemd/system/alastair-presenceBt.service
+^
+[Unit]
+Description=Alastair's presenceBt
+After=multi-user.target
+
+[Service]
+Restart=always
+Type=idle
+ExecStart=/usr/bin/python /home/pi/alastair/presenceBt.py -silent
+
+[Install]
+WantedBy=multi-user.target
+
+sudo nano /lib/systemd/system/alastair-presenceMotion.service
+^
+[Unit]
+Description=Alastair's presenceMotion
+After=multi-user.target
+
+[Service]
+Restart=always
+Type=idle
+ExecStart=/usr/bin/python /home/pi/alastair/presenceMotion.py -silent
+
+[Install]
+WantedBy=multi-user.target
+
+sudo nano /lib/systemd/system/alastair-serverFlask.service
+^
+[Unit]
+Description=Alastair's serverFlask
+After=multi-user.target
+
+[Service]
+Restart=always
+Type=idle
+ExecStart=/usr/bin/python /home/pi/alastair/serverFlask.py
+
+[Install]
+WantedBy=multi-user.target
+
+sudo nano /lib/systemd/system/alastair-jsonExport.service
+^
+[Unit]
+Description=Alastair's jsonExport Loop
+After=multi-user.target
+
+[Service]
+Restart=always
+Type=idle
+ExecStart=/usr/bin/python /home/pi/alastair/dataCompiler.py -silent -jsonExport
+
+[Install]
+WantedBy=multi-user.target
+
+sudo chmod 644 /lib/systemd/system/alastair-*.service
+sudo systemctl daemon-reload
+sudo systemctl enable alastair-presenceBt
+sudo systemctl enable alastair-presenceMotion
+sudo systemctl enable alastair-rulesLoop
+sudo systemctl enable alastair-serverFlask
+sudo systemctl enable alastair-jsonExport
+sudo systemctl start alastair-*
+sudo systemctl status alastair-*
+
+
+[*] Watchdog
+
+sudo modprobe bcm2708_wdog
+echo "bcm2708_wdog" | sudo tee -a /etc/modules
+sudo apt-get install watchdog -y
+
+sudo nano /lib/systemd/system/watchdog.service
+^
+[Install]
+WantedBy=multi-user.target
+
+sudo nano /etc/watchdog.conf
+!
+- Uncomment the line that starts with #watchdog-device
+- Uncomment the line that says #max-load-1 = 24 
+
+sudo systemctl enable watchdog
+sudo systemctl start watchdog
+
+
+{*] shellinabox
+sudo apt-get install shellinabox -y
+
+
+[*] Reboot
+sudo reboot
